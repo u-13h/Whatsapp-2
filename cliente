@@ -1,0 +1,58 @@
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Scanner;
+
+/**
+ *
+ * @author Uriel
+ */
+public class Mensajes {
+    private static Socket server;
+
+    public static void main(String[] args) {
+        conectarse();
+        Scanner scn = new Scanner(System.in);
+ 
+            String txt = recibir();   
+            txt = txt.trim();
+
+            if (txt.equals("1")) {
+                try {
+                    while (true) {
+                        String dato = scn.nextLine();
+                        server.getOutputStream().write(dato.getBytes("UTF-8"));
+                    }
+                } catch (IOException ex) {
+                }
+            } 
+            else if (txt.equals("0")) {
+                // modo recibir
+                while(true){
+                String msg = recibir();
+                System.out.println(msg);
+                }
+            }
+        
+    }
+
+    private static void conectarse() {
+        while (true) {
+            try {
+                server = new Socket("127.0.0.1", 1234);
+                System.out.println("conectado");
+                break;
+            } catch (IOException ex) {System.out.println("Error");}
+        }
+    }
+
+    private static String recibir() {
+        try {
+            byte[] arr = new byte[50];
+            int len = server.getInputStream().read(arr);
+            if (len == -1) return "";
+            return new String(arr, 0, len, "UTF-8");
+        } catch (IOException ex) {
+            return "";
+        }
+    }
+}
