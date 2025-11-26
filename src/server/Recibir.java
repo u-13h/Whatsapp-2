@@ -1,0 +1,53 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package server;
+
+import cocochat.Cocochat;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Iterator;
+
+/**
+ *
+ * @author Uriel
+ */
+public class Recibir implements Runnable{
+    private Socket socket;
+    
+    public Recibir(Socket socket){
+        this.socket = socket;
+    }
+
+    @Override
+    public void run() {
+        
+         try {
+            byte[] arr = new byte[50];
+            while(true){
+            int len = socket.getInputStream().read(arr);
+            if (len <= 0) continue;
+            String msg = new String(arr, 0, len, "UTF-8");
+            System.out.println(msg);
+            Iterator<Socket> it = Cocochat.clientes.iterator();
+            
+            while (it.hasNext()) {
+                Socket cliente = it.next();
+
+                try {
+                    cliente.getOutputStream().write(msg.getBytes("UTF-8"));
+                } catch (IOException e) {
+                    it.remove();
+                }
+            }
+            }
+            
+            } catch (IOException ex) {
+                //System.out.println("Error");
+        }
+    }
+    
+   
+}
+
