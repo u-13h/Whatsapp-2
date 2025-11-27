@@ -35,7 +35,7 @@ public class Recibir implements Runnable{
             System.out.println(msg);
             
             
-            if(msg.startsWith("USER:")){
+            if(msg.startsWith("USER:")){//
                 String persona = msg.substring(5);
                 Cocochat.usuarios.put(persona,socket);
             }
