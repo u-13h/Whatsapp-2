@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import modelos.Usuarios;
 import server.Recibir;
 
@@ -18,11 +20,12 @@ import server.Recibir;
  * @author Uriel
  */
 public class Cocochat {
-    private static Socket socket;
+
     private static ServerSocket ss;
     private static String txt;
     private static Socket socket1 = null;
     public static List<Socket> clientes = new ArrayList<>();
+    public static Map<String, Socket> usuarios = new HashMap();
 
     /**
      * @param args the command line arguments
@@ -36,27 +39,20 @@ public class Cocochat {
         
         try {
             ss = new ServerSocket(1234);
-            System.out.println("Esperando");
-            socket = ss.accept();
-            System.out.println("Conectado");
-            String num = "1";
-            socket.getOutputStream().write(num.getBytes("UTF-8"));
         } catch (IOException ex) {
             System.out.println("Error");
+            return;
         }
-        
-        Recibir recibir = new Recibir(socket);
-        Thread hilo = new Thread(recibir);
-        hilo.start();
                 
                 
         new Thread(() -> {
+            byte[] arr = new byte[50];
             while(true){
             try {
              socket1 = ss.accept();
-             String num = "0";
-             clientes.add(socket1);
-             socket1.getOutputStream().write("0".getBytes("UTF-8"));
+            Recibir recibir = new Recibir(socket1);
+            Thread hilo = new Thread(recibir);
+            hilo.start();
              
             } catch (IOException ex) {
                 System.out.println("Error");

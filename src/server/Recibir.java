@@ -8,6 +8,7 @@ import cocochat.Cocochat;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  *
@@ -22,7 +23,9 @@ public class Recibir implements Runnable{
 
     @Override
     public void run() {
-        
+        Socket cliente = socket;
+        String receptor = "";
+        String texto = "";
          try {
             byte[] arr = new byte[50];
             while(true){
@@ -30,17 +33,32 @@ public class Recibir implements Runnable{
             if (len <= 0) continue;
             String msg = new String(arr, 0, len, "UTF-8");
             System.out.println(msg);
-            Iterator<Socket> it = Cocochat.clientes.iterator();
             
-            while (it.hasNext()) {
-                Socket cliente = it.next();
-
-                try {
-                    cliente.getOutputStream().write(msg.getBytes("UTF-8"));
-                } catch (IOException e) {
-                    it.remove();
-                }
+            
+            if(msg.startsWith("USER:")){
+                String persona = msg.substring(5);
+                Cocochat.usuarios.put(persona,socket);
             }
+            
+            else if(msg.startsWith("MSG:")){
+                String[] partes = msg.split("\\|", 2);
+                receptor = partes[0].substring(4);
+                texto = partes[1];
+                
+                for(Map.Entry<String,Socket> m : Cocochat.usuarios.entrySet()){
+                if(m.getKey().equals(receptor)){
+                    cliente = m.getValue();
+                }
+                }
+                
+                try {
+                    cliente.getOutputStream().write(texto.getBytes("UTF-8"));
+                } catch (IOException e) {
+                    cliente.close();
+                }
+                
+            }
+            
             }
             
             } catch (IOException ex) {
