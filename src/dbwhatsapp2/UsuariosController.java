@@ -83,4 +83,41 @@ public class UsuariosController extends Conexion{
         
         return usuario;
     }
+    
+    //metodos para Grupos
+    public int obtenerIdUsuario(String nomUsuario){
+        int idUsuario = -1;
+        try{
+            PreparedStatement sql;
+            sql = get().prepareStatement("SELECT id_usuario FROM usuarios WHERE usuario = ?");
+            
+            sql.setString(1, nomUsuario);
+            ResultSet rs = sql.executeQuery();
+            
+            if(rs.next()){idUsuario = rs.getInt("id_usuario");}
+            
+            rs.close();
+            sql.close();
+        }catch(SQLException ex){
+            System.out.println("Error al obtener ID de usuario: " + ex.getMessage());
+        } return idUsuario;
+    } 
+    
+    public String obtenerNombreUsuario(int idUsuario){
+        String nomUsuario = "";
+        try{
+            PreparedStatement sql;
+            sql = get().prepareStatement("SELECT usuario FROM usuarios WHERE id_usuario = ?");
+            sql.setInt(1, idUsuario);
+            ResultSet rs = sql.executeQuery();
+            if(rs.next()){
+                nomUsuario = rs.getString("usuario");
+            }
+            
+            rs.close();
+            sql.close();
+        }catch(SQLException ex){
+            System.out.println("Error al obtener nombre de usuario: " + ex.getMessage());
+        }return nomUsuario;
+    }
 }
