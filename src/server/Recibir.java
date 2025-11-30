@@ -24,8 +24,6 @@ public class Recibir implements Runnable{
     @Override
     public void run() {
         Socket cliente = socket;
-        String receptor = "";
-        String texto = "";
          try {
             byte[] arr = new byte[50];
             while(true){
@@ -37,25 +35,13 @@ public class Recibir implements Runnable{
             
             if(msg.startsWith("USER:")){//
                 String persona = msg.substring(5);
-                Cocochat.usuarios.put(persona,socket);
+                Clientes nuevo = new Clientes(cliente,1);
+                Cocochat.usuarios.put(persona,nuevo);
             }
             
             else if(msg.startsWith("MSG:")){
-                String[] partes = msg.split("\\|", 2);
-                receptor = partes[0].substring(4);
-                texto = partes[1];
-                
-                for(Map.Entry<String,Socket> m : Cocochat.usuarios.entrySet()){
-                if(m.getKey().equals(receptor)){
-                    cliente = m.getValue();
-                }
-                }
-                
-                try {
-                    cliente.getOutputStream().write(texto.getBytes("UTF-8"));
-                } catch (IOException e) {
-                    cliente.close();
-                }
+                EnviarMensaje enviar = new EnviarMensaje(msg,cliente);
+                enviar.enviar();
                 
             }
             
