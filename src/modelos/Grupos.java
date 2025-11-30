@@ -11,7 +11,7 @@ package modelos;
 public class Grupos {
     private int idGrupo;
     private String nombre;
-    
+    //si
     public Grupos(int idGrupo, String nombre)
     {
         this.idGrupo = idGrupo;
