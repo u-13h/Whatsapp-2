@@ -29,6 +29,7 @@ public class Cocochat {
     private static Socket socket1 = null;
     public static List<Socket> clientes = new ArrayList<>();
     public static Map<String, Clientes> usuarios = new HashMap<>();
+    public static String[] listaUsuarios;
 
     /**
      * @param args the command line arguments
@@ -48,35 +49,31 @@ public class Cocochat {
             System.out.println("Error");
             return;
         }
-       
-                
-                
+
         new Thread(() -> {
-            byte[] arr = new byte[50];
-            while(true){
-            try {
-             socket1 = ss.accept();
-            Recibir recibir = new Recibir(socket1);
-            Thread hilo = new Thread(recibir);
-            hilo.start();
-             
-            } catch (IOException ex) {
-                System.out.println("Error");
-            }
+            while (true) {
+                try {
+                    socket1 = ss.accept();
+                    Recibir recibir = new Recibir(socket1);
+                    Thread hilo = new Thread(recibir);
+                    hilo.start();
+
+                } catch (IOException ex) {
+                    System.out.println("Error");
+                }
             }
         }).start();
-        
-        
+
         Thread hilo = new Thread(con);
         hilo.start();
         
-        
         new Thread(() -> {
-            while(true){
+            while (true) {
                 String dato = scn.nextLine();
-                if(!dato.isBlank() && !dato.isEmpty()){
-                    for(Map.Entry<String,Clientes> x : usuarios.entrySet()){
-                        
+                if (!dato.isBlank() && !dato.isEmpty()) {
+
+                    for (Map.Entry<String, Clientes> x : usuarios.entrySet()) {
+
                         System.out.println(x.getKey());
                         System.out.println(x.getValue().getEstado());
                     }
@@ -85,39 +82,72 @@ public class Cocochat {
         }).start();
         
         new Thread(() -> {
-        while(true){
-            
-            StringBuilder mensaje = new StringBuilder("USERS:");
-            for (Map.Entry<String, Clientes> entry : usuarios.entrySet()) {
-                String nombre = entry.getKey();
-                int estado = entry.getValue().getEstado();
-                mensaje.append(nombre).append(",").append(estado).append(";");
-            }
-            
-            String listaFinal = mensaje.toString();
-            
-            for (Map.Entry<String, Clientes> entry : usuarios.entrySet()) {
-                try {
-                    if(!entry.getValue().getSocket().isClosed() && entry.getValue().getEstado()==1){
-                        entry.getValue().getSocket().getOutputStream().write(listaFinal.getBytes("UTF-8"));
+            while (true) {
+
+
+                StringBuilder mensajeUsers = new StringBuilder("USERS:");
+
+                for (Map.Entry<String, Clientes> entry : usuarios.entrySet()) {
+                    String nombre = entry.getKey();
+                    int estado = entry.getValue().getEstado();
+                    mensajeUsers.append(nombre).append(",").append(estado).append(";");
+                }
+
+                String listaUsuarios = mensajeUsers.toString();
+
+                for (Map.Entry<String, Clientes> entry : usuarios.entrySet()) {
+                    try {
+                        if (!entry.getValue().getSocket().isClosed()
+                                && entry.getValue().getEstado() == 1) {
+
+                            entry.getValue().getSocket()
+                                    .getOutputStream()
+                                    .write(listaUsuarios.getBytes("UTF-8"));
+                        }
+                    } catch (IOException ex) {
+                        System.out.println("Error enviando USERS");
                     }
-                } catch (IOException ex) {
-                    System.getLogger(Cocochat.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+
+                for (Map.Entry<String, Clientes> entry : usuarios.entrySet()) {
+
+                    Clientes clienteActual = entry.getValue();
+                    Socket socketUser = clienteActual.getSocket();
+
+                    if (clienteActual.getEstado() != 1) continue;
+
+                    ArrayList<String> amigos = clienteActual.getAmigos(); 
+
+
+                    StringBuilder mensajeFriends = new StringBuilder("FRIENDS:");
+
+                    for (String amigo : amigos) {
+                        Clientes info = usuarios.get(amigo);
+
+                        if (info != null) {
+                            mensajeFriends.append(amigo)
+                                    .append(",")
+                                    .append(info.getEstado())
+                                    .append(";");
+                        }
+                    }
+
+                    try {
+                        socketUser.getOutputStream().write(
+                                mensajeFriends.toString().getBytes("UTF-8")
+                        );
+                    } catch (IOException ex) {
+                        System.out.println("Error enviando FRIENDS");
+                    }
+                }
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex) {
                 }
             }
-            
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ex) {
-                System.getLogger(Cocochat.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-            }
-            
-        }
-            
-            
+
         }).start();
-        
 
     }
-    
 }
