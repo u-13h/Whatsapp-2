@@ -21,9 +21,11 @@ public class UsuariosController extends Conexion{
     public void addusuario(Usuarios u){
         try {
             PreparedStatement sql;
-            sql = get().prepareStatement("INSERT INTO usuarios(usuario,contrasena) VALUES(?,?)");
+            sql = get().prepareStatement("INSERT INTO usuarios(usuario,contrasena,pregunta,respuesta) VALUES(?,?,?,?)");
             sql.setString(1, u.getusuario());
             sql.setString(2, u.getcontraseña());
+            sql.setString(3, u.getpregunta());
+            sql.setString(4, u.getrespuesta());
             sql.executeUpdate();
             
             }
@@ -41,7 +43,8 @@ public class UsuariosController extends Conexion{
             ResultSet rs = sql.executeQuery();
         
         while (rs.next()) {
-            Usuarios u = new Usuarios(rs.getString("usuario"), rs.getString("contrasena"));
+            Usuarios u = new Usuarios(rs.getString("usuario"), rs.getString("contrasena"), 
+                    rs.getString("pregunta"), rs.getString("respuesta"));
             lista.add(u);
         }
         
@@ -57,8 +60,90 @@ public class UsuariosController extends Conexion{
         return lista;
     }
     
+    public String login(String usuario, String contraseña){
+        
+        try {
+            PreparedStatement sql;
+            sql = get().prepareStatement("SELECT * FROM usuarios WHERE usuario = ? AND contrasena = ?");
+            sql.setString(1, usuario);
+            sql.setString(2, contraseña);
+            ResultSet rs = sql.executeQuery();
+            
+            if(rs.next()){
+            rs.close();
+            sql.close();
+            return "1";
+            }
+            else{
+            rs.close();
+            sql.close();
+            return "0";
+            }
+            
+        } catch (SQLException ex) {
+            System.out.println("Error al obtener usuario"+ex.getMessage());
+        }
+          
+        return usuario;
+    }
+    
+    public String recuperar(String usuario, String respuesta){
+        
+        try {
+            PreparedStatement sql;
+            sql = get().prepareStatement("SELECT contrasena FROM usuarios WHERE usuario = ? AND respuesta = ?");
+            sql.setString(1, usuario);
+            sql.setString(2, respuesta);;
+            ResultSet rs = sql.executeQuery();
+            
+            if(rs.next()){
+            String hola=rs.getString("contrasena");
+            rs.close();
+            sql.close();
+            return hola;
+            }
+            else{
+            rs.close();
+            sql.close();
+            return "incorrecto";
+            }
+            
+        } catch (SQLException ex) {
+            System.out.println("Error al obtener usuario"+ex.getMessage());
+        }
+          
+        return usuario;
+    }
+    
+    public String pregunta(String usuario){
+        
+        try {
+            PreparedStatement sql;
+            sql = get().prepareStatement("SELECT pregunta FROM usuarios WHERE usuario = ?");
+            sql.setString(1, usuario);
+            ResultSet rs = sql.executeQuery();
+            
+            if(rs.next()){
+            String hola=rs.getString("pregunta");
+            rs.close();
+            sql.close();
+            return hola;
+            }
+            else{
+            rs.close();
+            sql.close();
+            return "0";
+            }
+            
+        } catch (SQLException ex) {
+            System.out.println("Error al obtener usuario"+ex.getMessage());
+        }
+          
+        return usuario;
+    }
+    
     public Usuarios getusuario(int id){
-        Usuarios usuario = new Usuarios("","");
+        Usuarios usuario = new Usuarios("","","","");
         
         try {
             PreparedStatement sql;
@@ -69,6 +154,8 @@ public class UsuariosController extends Conexion{
             if(rs.next()){
             usuario.setusuario(rs.getString("usuario"));
             usuario.setcontraseña(rs.getString("contrasena"));
+            usuario.setpregunta(rs.getString("pregunta"));
+            usuario.setrespuesta(rs.getString("respuesta"));
             }
             
             rs.close();

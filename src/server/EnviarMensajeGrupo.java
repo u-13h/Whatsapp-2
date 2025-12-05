@@ -56,7 +56,7 @@ public class EnviarMensajeGrupo {
                     Clientes cliente = Cocochat.usuarios.get(miembro);
                     if(cliente.getEstado() == 1 && !cliente.getSocket().isClosed())
                         try{
-                            cliente.getSocket().getOutputStream().write(msgFormateado.getBytes("UST-8"));
+                            cliente.getSocket().getOutputStream().write(msgFormateado.getBytes("UTF-8"));
                         } catch(IOException e){
                             System.out.println("Error enviando a " + miembro);
                         }

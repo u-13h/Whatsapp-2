@@ -32,7 +32,7 @@ public class EnviarMensaje{
                     cliente = m.getValue().getSocket();
                 }
                 }
-                
+                texto = "MENSAJE:"+texto;
                 try {
                     cliente.getOutputStream().write(texto.getBytes("UTF-8"));
                 } catch (IOException e) {
@@ -43,5 +43,7 @@ public class EnviarMensaje{
             }
                 }
     }
+    
+   
     
 }
